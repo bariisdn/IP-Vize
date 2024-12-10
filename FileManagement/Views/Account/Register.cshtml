@@ -1,0 +1,58 @@
+@model FileManagement.ViewModels.RegisterViewModel
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header text-center">
+                    <h2 class="mb-0">Kayıt Ol</h2>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Register" method="post" novalidate>
+                        <!-- Kullanıcı Adı -->
+                        <div class="mb-3">
+                            <label for="Username" class="form-label">Kullanıcı Adı</label>
+                            <input asp-for="Username" id="Username"/>
+                            <div class="invalid-feedback">
+                                <span asp-validation-for="Username"></span>
+                            </div>
+                        </div>
+
+                        <!-- E-posta -->
+                        <div class="mb-3">
+                            <label for="Email" class="form-label">E-posta</label>
+                            <input asp-for="Email" id="Email" type="email"/>
+                           
+                        </div>
+                        <!-- Şifre -->
+                        <div class="mb-3">
+                            <label for="Password" class="form-label">Şifre</label>
+                            <input asp-for="Password" id="Password" type="password"/>
+                            <div class="invalid-feedback">
+                                <span asp-validation-for="Password"></span>
+                            </div>
+                        </div>
+
+                        <!-- Şifre (Tekrar) -->
+                        <div class="mb-3">
+                            <label for="ConfirmPassword" class="form-label">Şifre (Tekrar)</label>
+                            <input asp-for="ConfirmPassword" id="ConfirmPassword" type="password"/>
+                            <div class="invalid-feedback">
+                                <span asp-validation-for="ConfirmPassword"></span>
+                            </div>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">Kayıt Ol</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

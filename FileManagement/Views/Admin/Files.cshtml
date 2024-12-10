@@ -1,0 +1,124 @@
+@model IEnumerable<FileManagement.ViewModels.FileListViewModel>
+
+<div class="container mt-5">
+    <h2 class="mb-4">Dosya Yönetimi</h2>
+
+    <!-- Search Bar -->
+    <div class="mb-3">
+        <input type="text" id="searchBar" class="form-control" placeholder="Dosya ismine göre ara...">
+    </div>
+
+    <!-- Dosya Yükleme Formu -->
+    <form id="uploadForm" enctype="multipart/form-data" class="d-flex align-items-center gap-1 mt-3 mb-3">
+        <div class="form-group mb-0">
+            <input type="file" id="file" name="file" class="form-control" required style="width: auto;">
+        </div>
+        <div class="form-group mb-0">
+            <input type="hidden" id="userId" name="userId" class="form-control" value="@ViewBag.UserId">
+        </div>
+        <button type="submit" class="btn btn-primary">Dosya Yükle</button>
+    </form>
+
+    <!-- Dosya Listesi -->
+    <div class="row" id="fileContainer">
+        @foreach (var file in Model)
+        {
+            <div class="col-md-4 file-card" data-filename="@file.FileName">
+                <div class="card mb-4 shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title">@file.FileName</h5>
+                        <p class="card-text">
+                            <strong>Dosya Türü:</strong> @file.FileType <br />
+                            <strong>Yükleme Tarihi:</strong> @file.UploadedOn.ToString("yyyy-MM-dd") <br />
+                            <strong>Kullanıcı:</strong> @file.UserName
+                        </p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <button class="btn btn-primary btn-sm download-btn" data-id="@file.Id">İndir</button>
+                            <button class="btn btn-danger btn-sm delete-btn" data-id="@file.Id">Sil</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        // Arama Çubuğu
+        $('#searchBar').on('input', function () {
+            const searchValue = $(this).val().toLowerCase();
+            $('.file-card').each(function () {
+                const fileName = $(this).data('filename').toLowerCase();
+                $(this).toggle(fileName.includes(searchValue));
+            });
+        });
+
+        // Dosya Yükleme
+        $('#uploadForm').on('submit', function (e) {
+            e.preventDefault();
+
+            const formData = new FormData(this);
+
+            $.ajax({
+                url: '/Admin/UploadFile',
+                type: 'POST',
+                data: formData,
+                contentType: false,
+                processData: false,
+                success: function (response) {
+                    alert(response.message);
+                    location.reload();
+                },
+                error: function (xhr) {
+                    alert('Dosya yüklenirken bir hata oluştu.');
+                    console.error(xhr.responseText);
+                }
+            });
+        });
+
+        // Dosya İndirme
+        $(document).on('click', '.download-btn', function () {
+            const fileId = $(this).data('id');
+
+            $.ajax({
+                url: `/File/Download/${fileId}`,
+                type: 'GET',
+                xhrFields: { responseType: 'blob' },
+                success: function (blob) {
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = ''; // Sunucudan gelen dosya adı kullanılacak
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                },
+                error: function () {
+                    alert('Dosya indirirken bir hata oluştu.');
+                }
+            });
+        });
+
+        // Dosya Silme
+        $(document).on('click', '.delete-btn', function () {
+            const fileId = $(this).data('id');
+
+            if (confirm('Bu dosyayı silmek istediğinize emin misiniz?')) {
+                $.ajax({
+                    url: `/File/Delete/${fileId}`,
+                    type: 'DELETE',
+                    success: function (response) {
+                        alert(response.message);
+                        location.reload();
+                    },
+                    error: function (xhr) {
+                        alert('Dosya silinirken bir hata oluştu.');
+                        console.error(xhr.responseText);
+                    }
+                });
+            }
+        });
+    </script>
+}
